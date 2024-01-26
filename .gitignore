@@ -1,0 +1,32 @@
+# Nuxt dev/build outputs
+.output
+.nuxt
+.nitro
+.cache
+dist
+
+# Node dependencies
+node_modules
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Logs
+logs
+*.log
+
+# Misc
+.DS_Store
+.fleet
+.idea
+.vscode
+.hbuilderx
+
+# Local env files
+.env
+.env.*
+!.env.example
+
+# electron
+dist-electron
+release
