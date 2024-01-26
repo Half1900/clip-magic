@@ -44,7 +44,6 @@
     "@nuxt/devtools-kit": "^0.7.4",
     "@pinia-plugin-persistedstate/nuxt": "^1.2",
     "@pinia/nuxt": "^0.5",
-    "moment": "^2.29.4",
     "pinia": "^2.1.6",
     "vue": "^3.3.4",
     "vue-router": "^4.2.4"

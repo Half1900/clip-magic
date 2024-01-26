@@ -5,7 +5,8 @@ import {
   screen,
   globalShortcut,
   clipboard,
-  webFrame,
+  Tray,
+  Menu,
   type NativeImage
 } from 'electron'
 import path from 'node:path'
@@ -76,6 +77,8 @@ export class ClipboardObserver {
   }
 }
 
+const title = 'Clip Magic'
+
 const registerGlobalShortcuts = (win: BrowserWindow) => {
   globalShortcut.register('CommandOrControl+Shift+V', () => {
     if (win.isVisible()) {
@@ -94,7 +97,6 @@ const registerHandle = (win: BrowserWindow) => {
   ipcMain.handle(ClipboardEvent.Paste, (_, content) => {
     board.writeText(content as unknown as string)
     win.hide()
-    webFrame.insertText(content)
   })
 }
 
@@ -106,11 +108,31 @@ const registerEvent = (win: BrowserWindow) => {
   })
 }
 
+const createMenu = (win: BrowserWindow) => {
+  const tray = new Tray(path.join(__dirname, '../assets/image/logo.png'))
+
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: '退出',
+      click: function () {
+        win.destroy()
+        app.quit()
+      }
+    }
+  ])
+
+  tray.setToolTip(title)
+  tray.setContextMenu(contextMenu)
+  tray.on('click', () => {
+    win.show()
+  })
+}
+
 const createWindow = () => {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize
   const winHeight = 240
   const win = new BrowserWindow({
-    title: 'Clip Magic',
+    title,
     icon: path.join(__dirname, '../assets/image/logo.png'),
     autoHideMenuBar: true,
     hiddenInMissionControl: true,
@@ -123,7 +145,9 @@ const createWindow = () => {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js')
     },
-    titleBarStyle: 'hidden'
+    titleBarStyle: 'hidden',
+    fullscreenable: false,
+    show: false
   })
 
   if (!app.isPackaged && process.env.VITE_DEV_SERVER_URL) {
@@ -138,6 +162,8 @@ const createWindow = () => {
 app.whenReady().then(() => {
   // 创建窗口
   const win = createWindow()
+  // 创建菜单
+  createMenu(win)
   // 注册快捷键
   registerGlobalShortcuts(win)
   // 注册权柄
