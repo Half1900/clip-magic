@@ -4,3 +4,6 @@ interface Window {
     paste(content: string): Promise<void>
   }
 }
+
+declare module '*.ico'
+declare module '*.png'

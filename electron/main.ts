@@ -7,15 +7,19 @@ import {
   clipboard,
   Tray,
   Menu,
+  nativeImage,
   type NativeImage
 } from 'electron'
 import path from 'node:path'
 
 import { ClipboardEvent } from './event'
+import iconPath from '../assets/image/logo.png'
 
 export type ChangeText = (text: string) => void
 export type ChangeImage = (image: NativeImage) => void
 export type ChangeHTML = (html: string) => void
+
+const icon = nativeImage.createFromDataURL(iconPath)
 
 export class ClipboardObserver {
   private preContext?: string
@@ -109,7 +113,7 @@ const registerEvent = (win: BrowserWindow) => {
 }
 
 const createMenu = (win: BrowserWindow) => {
-  const tray = new Tray(path.join(__dirname, '../assets/image/logo.png'))
+  const tray = new Tray(icon)
 
   const contextMenu = Menu.buildFromTemplate([
     {
@@ -133,7 +137,7 @@ const createWindow = () => {
   const winHeight = 240
   const win = new BrowserWindow({
     title,
-    icon: path.join(__dirname, '../assets/image/logo.png'),
+    icon,
     autoHideMenuBar: true,
     hiddenInMissionControl: true,
     height: winHeight,
@@ -147,7 +151,8 @@ const createWindow = () => {
     },
     titleBarStyle: 'hidden',
     fullscreenable: false,
-    show: false
+    show: false,
+    alwaysOnTop: true
   })
 
   if (!app.isPackaged && process.env.VITE_DEV_SERVER_URL) {
