@@ -19,10 +19,12 @@ export interface Tag {
 export const useClipboard = defineStore(
   'clipboard',
   () => {
-    const id = ref<number>(1)
     const list = ref<ClipItem[]>([])
-    const tagId = ref<number>(1)
     const tags = ref<Tag[]>([{ id: 0, title: '常规', color: 'green-inverse' }])
+    const key = reactive({
+      itemId: 1,
+      tagId: 1
+    })
     const currTag = reactive<Tag>({
       id: 0,
       title: '',
@@ -33,19 +35,17 @@ export const useClipboard = defineStore(
       list.value.filter(item => item.tagId === currTag.id)
     )
 
-    const add = (item: Pick<ClipItem, 'content'>) => {
+    const add = (
+      item: Pick<ClipItem, 'content'> & Partial<Omit<ClipItem, 'content'>>
+    ) => {
       list.value.unshift({
-        id: id.value,
-        tagId: currTag.id,
+        id: key.itemId,
+        tagId: 0,
         title: 'No title',
         date: new Date(),
         ...item
       })
-      id.value++
-    }
-
-    const select = (item: ClipItem) => {
-      remove(item.id)
+      key.itemId++
     }
 
     const remove = (id: number) => {
@@ -55,11 +55,11 @@ export const useClipboard = defineStore(
     const addTag = (tag: Pick<Tag, 'title'>) => {
       const color = getRandomColor() as Tag['color']
       tags.value.push({
-        id: tagId.value,
+        id: key.tagId,
         color,
         ...tag
       })
-      tagId.value++
+      key.tagId++
     }
 
     const selectTag = (tag: Tag) => {
@@ -68,10 +68,10 @@ export const useClipboard = defineStore(
     }
 
     return {
+      key,
       list,
       clipList,
       add,
-      select,
       remove,
       tags,
       currTag,

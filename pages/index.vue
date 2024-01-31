@@ -5,6 +5,9 @@
       v-for="tag in clipboard.tags"
       :color="tag.color"
       :key="tag.id"
+      @dragenter="handleDragEnter(tag)"
+      @dragleave="handleDragLeave"
+      @dragover="$event.preventDefault()"
       @click="selectTag(tag)"
     >
       {{ tag.title }}
@@ -34,14 +37,19 @@
     class="flex overflow-y-hidden overflow-x-scroll p-[10px]"
   >
     <a-tooltip
-      class="item ml-[20px] h-[200px] min-w-[200px] max-w-[200px] select-none overflow-hidden rounded-md border border-primary-500 p-[5px] transition-shadow first:ml-0 hover:shadow-md hover:shadow-primary-500"
+      class="clip-item ml-[20px] h-[200px] min-w-[200px] max-w-[200px] select-none overflow-hidden rounded-md border border-primary-500 p-[5px] transition-shadow first:ml-0 hover:shadow-md hover:shadow-primary-500"
       v-if="clipboard.clipList.length"
       v-for="item in clipboard.clipList"
       :key="item.id"
       placement="leftTop"
       title="双击复制"
     >
-      <div @dblclick="handleSelect(item)">
+      <div
+        draggable="true"
+        @dragstart="handleDragStart(item)"
+        @dragend="handleDragEnd(item)"
+        @dblclick="handleSelect(item)"
+      >
         <a-tag
           class="h-[50px] w-full py-[5px]"
           :color="clipboard.currTag.color"
@@ -50,7 +58,9 @@
             class="border-none bg-transparent outline-none"
             v-model.lazy="item.title"
           />
-          <div>{{ item.date.toLocaleString() }}</div>
+          <div>
+            {{ moment(item.date).format('YYYY/MM/DD hh:mm:ss') }}
+          </div>
         </a-tag>
         {{ item.content }}
       </div>
@@ -66,6 +76,8 @@
 </template>
 
 <script setup lang="ts">
+import moment from 'moment'
+
 import { useClipboard, type ClipItem, type Tag } from '~/store'
 
 const interval = 500
@@ -73,11 +85,7 @@ const clipboard = useClipboard()
 const pasteListRef = ref<HTMLDivElement>()
 const addTagInputRef = ref<HTMLInputElement>()
 const isShowAddTagInput = ref(false)
-// const currTag = reactive<Tag>({
-//   id: 0,
-//   title: '',
-//   color: 'green-inverse'
-// })
+const currentDrag = ref<{ tag?: Tag; item?: ClipItem }>({})
 
 const timer = setInterval(async () => {
   const text = await window.electron.getClipText()
@@ -89,7 +97,6 @@ const timer = setInterval(async () => {
 
 const handleSelect = async (item: ClipItem) => {
   await window.electron.paste(item.content)
-  clipboard.select(item)
   pasteListRef.value?.scrollTo({
     left: 0
   })
@@ -112,13 +119,32 @@ const selectTag = (tag: Tag) => {
   clipboard.selectTag(tag)
 }
 
+const handleDragStart = (item: ClipItem) => {
+  currentDrag.value.item = item
+}
+
+const handleDragEnter = (tag: Tag) => {
+  currentDrag.value.tag = tag
+}
+
+const handleDragLeave = () => {
+  currentDrag.value.tag = undefined
+}
+
+const handleDragEnd = (item: ClipItem) => {
+  if (!currentDrag.value?.tag) return
+  const tag = currentDrag.value.tag
+  item.tagId = tag.id
+  clipboard.selectTag(tag)
+}
+
 onUnmounted(() => {
   clearInterval(timer)
 })
 </script>
 
 <style scoped>
-.item {
+.clip-item {
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
