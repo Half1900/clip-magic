@@ -1,3 +1,6 @@
+import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers'
+import Components from 'unplugin-vue-components/vite'
+
 export default defineNuxtConfig({
   ssr: false,
   router: {
@@ -37,6 +40,15 @@ export default defineNuxtConfig({
   vite: {
     server: {
       middlewareMode: false
-    }
+    },
+    plugins: [
+      Components({
+        resolvers: [
+          AntDesignVueResolver({
+            importStyle: false
+          })
+        ]
+      })
+    ]
   }
 })

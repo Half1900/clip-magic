@@ -1,49 +1,115 @@
 <template>
-  <div class="h-[15px] bg-primary-500 pl-[8px] text-[10px] text-white">
-    Clip Magic
-  </div>
+  <div class="flex justify-center pt-[10px] text-[12px]">
+    <a-tag
+      class="cursor-pointer rounded-full"
+      v-for="tag in clipboard.tags"
+      :color="tag.color"
+      :key="tag.id"
+      @click="selectTag(tag)"
+    >
+      {{ tag.title }}
+    </a-tag>
 
-  <div class="tags">
-    <div class="tag" v-for="tag in clipboard.tags" :key="tag.id"></div>
+    <a-tag
+      v-if="!isShowAddTagInput"
+      class="w-[60px] cursor-pointer border-dashed bg-white"
+      @click="handleShowAddTagInput"
+    >
+      New Tag
+    </a-tag>
+    <a-input
+      v-else
+      ref="addTagInputRef"
+      v-model:value="clipboard.currTag.title"
+      type="text"
+      size="small"
+      class="h-full w-[60px]"
+      @blur="handleAddTagInputBlur"
+      @keyup.enter="handleAddTagInputBlur"
+    />
   </div>
 
   <div
     ref="pasteListRef"
     class="flex overflow-y-hidden overflow-x-scroll p-[10px]"
   >
-    <div
+    <a-tooltip
       class="item ml-[20px] h-[200px] min-w-[200px] max-w-[200px] select-none overflow-hidden rounded-md border border-primary-500 p-[5px] transition-shadow first:ml-0 hover:shadow-md hover:shadow-primary-500"
-      v-for="item in clipboard.list"
+      v-if="clipboard.clipList.length"
+      v-for="item in clipboard.clipList"
       :key="item.id"
-      :title="item.content"
-      @dblclick="handleSelect(item.content)"
+      placement="leftTop"
+      title="双击复制"
     >
-      {{ item.content }}
+      <div @dblclick="handleSelect(item)">
+        <a-tag
+          class="h-[50px] w-full py-[5px]"
+          :color="clipboard.currTag.color"
+        >
+          <input
+            class="border-none bg-transparent outline-none"
+            v-model.lazy="item.title"
+          />
+          <div>{{ item.date.toLocaleString() }}</div>
+        </a-tag>
+        {{ item.content }}
+      </div>
+    </a-tooltip>
+
+    <div
+      v-else
+      class="flex h-[200px] w-full items-center justify-center text-[12px] text-slate-400"
+    >
+      暂无内容
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useClipboard } from '~/store'
+import { useClipboard, type ClipItem, type Tag } from '~/store'
 
-const pasteListRef = ref<HTMLDivElement>()
 const interval = 500
 const clipboard = useClipboard()
+const pasteListRef = ref<HTMLDivElement>()
+const addTagInputRef = ref<HTMLInputElement>()
+const isShowAddTagInput = ref(false)
+// const currTag = reactive<Tag>({
+//   id: 0,
+//   title: '',
+//   color: 'green-inverse'
+// })
 
 const timer = setInterval(async () => {
   const text = await window.electron.getClipText()
   if (!text) return
-  clipboard.handleCopy({
-    content: text,
-    date: new Date()
+  clipboard.add({
+    content: text
   })
 }, interval)
 
-const handleSelect = async (content: string) => {
-  await window.electron.paste(content)
+const handleSelect = async (item: ClipItem) => {
+  await window.electron.paste(item.content)
+  clipboard.select(item)
   pasteListRef.value?.scrollTo({
     left: 0
   })
+}
+
+const handleShowAddTagInput = async () => {
+  isShowAddTagInput.value = true
+  await nextTick()
+  addTagInputRef.value?.focus()
+}
+
+const handleAddTagInputBlur = () => {
+  isShowAddTagInput.value = false
+  if (!clipboard.currTag.title) return
+  clipboard.addTag({ title: clipboard.currTag.title })
+  clipboard.currTag.title = ''
+}
+
+const selectTag = (tag: Tag) => {
+  clipboard.selectTag(tag)
 }
 
 onUnmounted(() => {
@@ -57,7 +123,7 @@ onUnmounted(() => {
   text-overflow: ellipsis;
   display: -webkit-box;
   word-break: break-all;
-  -webkit-line-clamp: 8;
+  -webkit-line-clamp: 7;
   -webkit-box-orient: vertical;
 }
 </style>
