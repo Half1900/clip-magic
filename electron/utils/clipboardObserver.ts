@@ -1,8 +1,4 @@
-import { clipboard, type NativeImage } from 'electron'
-
-export type ChangeText = (text: string) => void
-export type ChangeImage = (image: NativeImage) => void
-export type ChangeHTML = (html: string) => void
+import { clipboard } from 'electron'
 
 export class ClipboardObserver {
   private preContext?: string
@@ -29,19 +25,23 @@ export class ClipboardObserver {
     this.changeHTML = options?.changeHTML
   }
 
-  getText() {
+  readText() {
     const readText = clipboard.readText()
     if (readText === this.preContext) return
     this.preContext = readText
-    return
+    return readText
   }
 
-  getImage() {
+  readImage() {
     return clipboard.readImage()
   }
 
-  getHTML() {
+  readHTML() {
     return clipboard.readHTML()
+  }
+
+  writeText(content: string) {
+    clipboard.writeText(content)
   }
 
   start() {

@@ -4,7 +4,6 @@ import {
   ipcMain,
   screen,
   globalShortcut,
-  clipboard,
   Tray,
   Menu,
   nativeImage,
@@ -12,79 +11,20 @@ import {
 } from 'electron'
 import path from 'node:path'
 
+import settings from './config/settings.json'
 import { ClipboardEvent } from './event'
+import { ClipboardObserver } from './utils'
 import iconPath from '../assets/image/logo.png'
 
 export type ChangeText = (text: string) => void
 export type ChangeImage = (image: NativeImage) => void
 export type ChangeHTML = (html: string) => void
 
+const title = 'Clip Magic'
 const icon = nativeImage.createFromDataURL(iconPath)
 
-export class ClipboardObserver {
-  private preContext?: string
-
-  private timer?: NodeJS.Timeout
-
-  private interval?: number
-
-  public changeText?: ChangeText
-
-  public changeImage?: ChangeImage
-
-  public changeHTML?: ChangeHTML
-
-  constructor(options?: {
-    interval?: number
-    changeText?: ChangeText
-    changeImage?: ChangeImage
-    changeHTML?: ChangeHTML
-  }) {
-    this.interval = options?.interval ?? 500
-    this.changeText = options?.changeText
-    this.changeText = options?.changeText
-    this.changeHTML = options?.changeHTML
-  }
-
-  readText() {
-    const readText = clipboard.readText()
-    if (readText === this.preContext) return
-    this.preContext = readText
-    return readText
-  }
-
-  readImage() {
-    return clipboard.readImage()
-  }
-
-  readHTML() {
-    return clipboard.readHTML()
-  }
-
-  writeText(content: string) {
-    clipboard.writeText(content)
-  }
-
-  start() {
-    this.timer = setInterval(() => {
-      const readText = clipboard.readText()
-      // const readImage = clipboard.readImage()
-      // const readHTML = clipboard.readHTML()
-      if (readText === this.preContext) return
-      this.preContext = readText
-      this.changeText && this.changeText(readText)
-    }, this.interval)
-  }
-
-  stop() {
-    clearInterval(this.timer)
-  }
-}
-
-const title = 'Clip Magic'
-
 const registerGlobalShortcuts = (win: BrowserWindow) => {
-  globalShortcut.register('CommandOrControl+Shift+V', () => {
+  globalShortcut.register(settings.openShortcutKey, () => {
     if (win.isVisible()) {
       win.hide()
     } else {
@@ -107,7 +47,7 @@ const registerHandle = (win: BrowserWindow) => {
 const registerEvent = (win: BrowserWindow) => {
   win.on('blur', () => {
     if (win.isVisible()) {
-      win.hide()
+      // win.hide()
     }
   })
 }
@@ -134,7 +74,7 @@ const createMenu = (win: BrowserWindow) => {
 
 const createWindow = () => {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize
-  const winHeight = 240
+  const winHeight = 255
   const win = new BrowserWindow({
     title,
     icon,
