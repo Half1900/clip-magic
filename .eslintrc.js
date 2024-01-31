@@ -55,6 +55,8 @@ module.exports = {
       'error',
       { vars: 'all', args: 'after-used', ignoreRestSiblings: true }
     ],
-    'no-undef': 'off'
+    'no-undef': 'off',
+    'vue/no-use-v-if-with-v-for': 'off',
+    '@typescript-eslint/no-explicit-any': 'off'
   }
 }
