@@ -13,6 +13,7 @@
     target: ['dmg']
   },
   win: {
+    icon: 'public/logo.ico',
     target: [
       {
         target: 'nsis',
