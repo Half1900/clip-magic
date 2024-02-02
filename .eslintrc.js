@@ -57,6 +57,7 @@ module.exports = {
     ],
     'no-undef': 'off',
     'vue/no-use-v-if-with-v-for': 'off',
-    '@typescript-eslint/no-explicit-any': 'off'
+    '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/ban-ts-comment': 'off'
   }
 }

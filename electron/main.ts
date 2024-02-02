@@ -11,9 +11,8 @@ import {
 } from 'electron'
 import path from 'node:path'
 
-import settings from './config/settings.json'
-import { ClipboardEvent } from './event'
-import { ClipboardObserver } from './utils'
+import { ClipboardEvent, SettingsEvent } from './event'
+import { ClipboardObserver, loadSettingsFile, writeSettingsFile } from './utils'
 import iconPath from '../assets/image/logo.png'
 
 export type ChangeText = (text: string) => void
@@ -22,6 +21,8 @@ export type ChangeHTML = (html: string) => void
 
 const title = 'Clip Magic'
 const icon = nativeImage.createFromDataURL(iconPath)
+const loadFileUrl = '.output/public'
+const settings = loadSettingsFile()
 
 const registerGlobalShortcuts = (win: BrowserWindow) => {
   globalShortcut.register(settings.openShortcutKey, () => {
@@ -42,6 +43,12 @@ const registerHandle = (win: BrowserWindow) => {
     board.writeText(content as unknown as string)
     win.hide()
   })
+  ipcMain.handle(SettingsEvent.Get, () => {
+    return settings
+  })
+  ipcMain.handle(SettingsEvent.Update, (_, content) => {
+    return writeSettingsFile(JSON.parse(content))
+  })
 }
 
 const registerEvent = (win: BrowserWindow) => {
@@ -55,10 +62,36 @@ const registerEvent = (win: BrowserWindow) => {
 const createMenu = (win: BrowserWindow) => {
   const tray = new Tray(icon)
 
+  let set: BrowserWindow | undefined
   const contextMenu = Menu.buildFromTemplate([
     {
+      label: '选项',
+      click() {
+        if (set) return
+        set = new BrowserWindow({
+          width: 600,
+          height: 500,
+          parent: win,
+          icon,
+          hiddenInMissionControl: true,
+          autoHideMenuBar: true,
+          webPreferences: {
+            preload: path.join(__dirname, 'preload.js')
+          }
+        })
+        if (!app.isPackaged && process.env.VITE_DEV_SERVER_URL) {
+          set.loadURL(process.env.VITE_DEV_SERVER_URL + '/#/settings')
+        } else {
+          set.loadFile(loadFileUrl + '/settings/index.html')
+        }
+        set.on('close', () => {
+          set = undefined
+        })
+      }
+    },
+    {
       label: '退出',
-      click: function () {
+      click() {
         win.destroy()
         app.quit()
       }
@@ -92,14 +125,19 @@ const createWindow = () => {
     titleBarStyle: 'hidden',
     fullscreenable: false,
     show: false,
-    alwaysOnTop: true,
     skipTaskbar: true
   })
+
+  if (app.isPackaged) {
+    app.setLoginItemSettings({
+      openAtLogin: settings.openAtLogin
+    })
+  }
 
   if (!app.isPackaged && process.env.VITE_DEV_SERVER_URL) {
     win.loadURL(process.env.VITE_DEV_SERVER_URL)
   } else {
-    win.loadFile('.output/public/index.html')
+    win.loadFile(loadFileUrl + '/index.html')
   }
 
   return win
@@ -116,4 +154,8 @@ app.whenReady().then(() => {
   registerHandle(win)
   // 注册事件
   registerEvent(win)
+})
+
+app.on('will-quit', () => {
+  globalShortcut.unregisterAll()
 })

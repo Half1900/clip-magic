@@ -87,6 +87,11 @@ const addTagInputRef = ref<HTMLInputElement>()
 const isShowAddTagInput = ref(false)
 const currentDrag = ref<{ tag?: Tag; item?: ClipItem }>({})
 
+const router = useRouter()
+if (location.href.includes('settings')) {
+  router.push('/settings')
+}
+
 const timer = setInterval(async () => {
   const text = await window.electron.getClipText()
   if (!text) return
