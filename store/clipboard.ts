@@ -25,6 +25,7 @@ export const useClipboard = defineStore(
       itemId: 1,
       tagId: 1
     })
+    const firstTag = computed(() => tags.value[0])
     const currTag = reactive<Tag>({
       id: 0,
       title: '',
@@ -52,6 +53,10 @@ export const useClipboard = defineStore(
       list.value = list.value.filter(item => item.id !== id)
     }
 
+    const removeByTagId = (tagId: number) => {
+      list.value = list.value.filter(item => item.tagId !== tagId)
+    }
+
     const addTag = (tag: Pick<Tag, 'title'>) => {
       const color = getRandomColor() as Tag['color']
       tags.value.push({
@@ -67,16 +72,23 @@ export const useClipboard = defineStore(
       currTag.color = tag.color
     }
 
+    const removeTag = (id: number) => {
+      tags.value = tags.value.filter(item => item.id !== id)
+    }
+
     return {
       key,
       list,
       clipList,
       add,
       remove,
+      removeByTagId,
       tags,
+      firstTag,
       currTag,
       addTag,
-      selectTag
+      selectTag,
+      removeTag
     }
   },
   {

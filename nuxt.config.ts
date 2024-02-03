@@ -11,7 +11,10 @@ export default defineNuxtConfig({
   app: {
     baseURL: './'
   },
-  css: ['@/assets/css/main.css'],
+  css: [
+    '@/assets/css/main.css',
+    'primevue/resources/themes/aura-light-green/theme.css'
+  ],
   postcss: {
     plugins: {
       tailwindcss: {},
@@ -21,7 +24,8 @@ export default defineNuxtConfig({
   modules: [
     '@pinia/nuxt',
     '@pinia-plugin-persistedstate/nuxt',
-    'nuxt-electron'
+    'nuxt-electron',
+    'nuxt-primevue'
   ],
   piniaPersistedstate: {
     storage: 'localStorage'
@@ -36,6 +40,11 @@ export default defineNuxtConfig({
       }
     ],
     renderer: {}
+  },
+  primevue: {
+    components: {
+      include: ['ContextMenu']
+    }
   },
   vite: {
     server: {

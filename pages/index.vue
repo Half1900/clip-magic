@@ -9,6 +9,7 @@
       @dragleave="handleDragLeave"
       @dragover="$event.preventDefault()"
       @click="selectTag(tag)"
+      @contextmenu="onTagMenuClick($event, tag)"
     >
       {{ tag.title }}
     </a-tag>
@@ -42,6 +43,7 @@
       v-for="item in clipboard.clipList"
       :key="item.id"
       placement="leftTop"
+      trigger="click"
       title="双击复制"
     >
       <div
@@ -49,6 +51,7 @@
         @dragstart="handleDragStart(item)"
         @dragend="handleDragEnd(item)"
         @dblclick="handleSelect(item)"
+        @contextmenu="onItemMenuClick($event, item)"
       >
         <a-tag
           class="h-[50px] w-full py-[5px]"
@@ -73,10 +76,15 @@
       暂无内容
     </div>
   </div>
+
+  <ContextMenu ref="itemMenuRef" :model="itemMenu" />
+  <ContextMenu ref="tagMenuRef" :model="tagMenu" />
 </template>
 
 <script setup lang="ts">
 import moment from 'moment'
+import ContextMenu from 'primevue/contextmenu'
+import { MenuItem } from 'primevue/menuitem'
 
 import { useClipboard, type ClipItem, type Tag } from '~/store'
 
@@ -141,6 +149,60 @@ const handleDragEnd = (item: ClipItem) => {
   const tag = currentDrag.value.tag
   item.tagId = tag.id
   clipboard.selectTag(tag)
+}
+
+const itemMenuRef = ref<InstanceType<typeof ContextMenu> | null>(null)
+const tagMenuRef = ref<InstanceType<typeof ContextMenu> | null>(null)
+const currentItemMenu = ref<ClipItem>()
+const currentTagMenu = ref<Tag>()
+
+const itemMenu: MenuItem[] = [
+  {
+    label: '删除',
+    icon: '',
+    command() {
+      if (!currentItemMenu.value) return
+      clipboard.remove(currentItemMenu.value.id)
+    }
+  }
+]
+
+const firstTagMenu: MenuItem[] = [
+  {
+    label: '删除全部记录',
+    command() {
+      if (!currentTagMenu.value) return
+      clipboard.removeByTagId(currentTagMenu.value.id)
+    }
+  }
+]
+
+const otherTagMenu: MenuItem[] = [
+  {
+    label: '删除标签',
+    command() {
+      const id = currentTagMenu.value?.id
+      if (!currentTagMenu.value || !id) return
+      clipboard.removeTag(id)
+      clipboard.removeByTagId(id)
+      clipboard.selectTag(clipboard.firstTag)
+    }
+  },
+  ...firstTagMenu
+]
+
+const tagMenu = computed(() =>
+  currentTagMenu.value?.id === 0 ? firstTagMenu : otherTagMenu
+)
+
+const onItemMenuClick = (e: Event, item: ClipItem) => {
+  currentItemMenu.value = item
+  itemMenuRef.value?.show(e)
+}
+
+const onTagMenuClick = (e: Event, tag: Tag) => {
+  currentTagMenu.value = tag
+  tagMenuRef.value?.show(e)
 }
 
 onUnmounted(() => {
