@@ -88,17 +88,16 @@ import { MenuItem } from 'primevue/menuitem'
 
 import { useClipboard, type ClipItem, type Tag } from '~/store'
 
+definePageMeta({
+  middleware: 'route-guard'
+})
+
 const interval = 500
 const clipboard = useClipboard()
 const pasteListRef = ref<HTMLDivElement>()
 const addTagInputRef = ref<HTMLInputElement>()
 const isShowAddTagInput = ref(false)
 const currentDrag = ref<{ tag?: Tag; item?: ClipItem }>({})
-
-const router = useRouter()
-if (location.href.includes('settings')) {
-  router.push('/settings')
-}
 
 const timer = setInterval(async () => {
   const text = await window.electron.getClipText()
@@ -158,8 +157,11 @@ const currentTagMenu = ref<Tag>()
 
 const itemMenu: MenuItem[] = [
   {
+    label: '修改',
+    command() {}
+  },
+  {
     label: '删除',
-    icon: '',
     command() {
       if (!currentItemMenu.value) return
       clipboard.remove(currentItemMenu.value.id)

@@ -6,22 +6,19 @@ import {
   globalShortcut,
   Tray,
   Menu,
-  nativeImage,
   type NativeImage
 } from 'electron'
-import path from 'node:path'
 
 import { ClipboardEvent, SettingsEvent } from './event'
+import { useWindow } from './hooks'
 import { ClipboardObserver, loadSettingsFile, writeSettingsFile } from './utils'
-import iconPath from '../assets/image/logo.png'
 
 export type ChangeText = (text: string) => void
 export type ChangeImage = (image: NativeImage) => void
 export type ChangeHTML = (html: string) => void
 
-const title = 'Clip Magic'
-const icon = nativeImage.createFromDataURL(iconPath)
-const loadFileUrl = '.output/public'
+const windowHook = useWindow()
+const createWindow = windowHook.createWindow
 const settings = loadSettingsFile()
 
 const registerGlobalShortcuts = (win: BrowserWindow) => {
@@ -60,32 +57,14 @@ const registerEvent = (win: BrowserWindow) => {
 }
 
 const createMenu = (win: BrowserWindow) => {
-  const tray = new Tray(icon)
+  const tray = new Tray(windowHook.icon)
 
-  let set: BrowserWindow | undefined
   const contextMenu = Menu.buildFromTemplate([
     {
       label: '选项',
       click() {
-        if (set) return
-        set = new BrowserWindow({
-          width: 600,
-          height: 500,
-          parent: win,
-          icon,
-          hiddenInMissionControl: true,
-          autoHideMenuBar: true,
-          webPreferences: {
-            preload: path.join(__dirname, 'preload.js')
-          }
-        })
-        if (!app.isPackaged && process.env.VITE_DEV_SERVER_URL) {
-          set.loadURL(process.env.VITE_DEV_SERVER_URL + '/#/settings')
-        } else {
-          set.loadFile(loadFileUrl + '/settings/index.html')
-        }
-        set.on('close', () => {
-          set = undefined
+        createWindow('settings', {
+          parent: win
         })
       }
     },
@@ -98,54 +77,46 @@ const createMenu = (win: BrowserWindow) => {
     }
   ])
 
-  tray.setToolTip(title)
+  tray.setToolTip(windowHook.title)
   tray.setContextMenu(contextMenu)
   tray.on('click', () => {
     win.show()
   })
 }
 
-const createWindow = () => {
+const createMainWindow = () => {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize
   const winHeight = 255
-  const win = new BrowserWindow({
-    title,
-    icon,
-    autoHideMenuBar: true,
-    hiddenInMissionControl: true,
+
+  const win = createWindow({
     height: winHeight,
     width,
     minHeight: winHeight,
     maxHeight: winHeight,
-    y: height - winHeight,
     x: 0,
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
-    },
-    titleBarStyle: 'hidden',
+    y: height - winHeight,
     fullscreenable: false,
     show: false,
-    skipTaskbar: true
+    skipTaskbar: true,
+    titleBarStyle: 'hidden'
   })
 
+  return win
+}
+
+const registerAppSettings = () => {
   if (app.isPackaged) {
     app.setLoginItemSettings({
       openAtLogin: settings.openAtLogin
     })
   }
-
-  if (!app.isPackaged && process.env.VITE_DEV_SERVER_URL) {
-    win.loadURL(process.env.VITE_DEV_SERVER_URL)
-  } else {
-    win.loadFile(loadFileUrl + '/index.html')
-  }
-
-  return win
 }
 
 app.whenReady().then(() => {
+  // 注册App配置
+  registerAppSettings()
   // 创建窗口
-  const win = createWindow()
+  const win = createMainWindow()
   // 创建菜单
   createMenu(win)
   // 注册快捷键
