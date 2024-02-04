@@ -20,7 +20,7 @@ export const useClipboard = defineStore(
   'clipboard',
   () => {
     const list = ref<ClipItem[]>([])
-    const tags = ref<Tag[]>([{ id: 0, title: '常规', color: 'green-inverse' }])
+    const tags = ref<Tag[]>([{ id: 0, title: '默认', color: 'green-inverse' }])
     const key = reactive({
       itemId: 1,
       tagId: 1

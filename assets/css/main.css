@@ -27,3 +27,12 @@
 ::-webkit-scrollbar-corner {
   background-color: #f1f1f1;
 }
+
+.p-contextmenu {
+  min-width: 100px;
+  font-size: 12px;
+}
+
+.p-menuitem-link {
+  padding: 5px 10px;
+}

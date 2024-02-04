@@ -1,6 +1,8 @@
 import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers'
 import Components from 'unplugin-vue-components/vite'
 
+const isProd = process.env.NODE_ENV === 'production'
+
 export default defineNuxtConfig({
   ssr: false,
   router: {
@@ -9,7 +11,7 @@ export default defineNuxtConfig({
     }
   },
   app: {
-    baseURL: './'
+    baseURL: isProd ? './' : '/'
   },
   css: [
     '@/assets/css/main.css',

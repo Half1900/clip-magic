@@ -38,7 +38,7 @@ const createWindow: CreateWindow = (windowId, options) => {
     ...opts
   })
 
-  const loadPath = windowId ? `/${windowId}` : ''
+  const loadPath = typeof windowId === 'object' ? '' : `/${windowId}`
   if (!app.isPackaged && process.env.VITE_DEV_SERVER_URL) {
     window.loadURL(process.env.VITE_DEV_SERVER_URL + loadPath)
   } else {
