@@ -86,7 +86,7 @@ import moment from 'moment'
 import ContextMenu from 'primevue/contextmenu'
 import { MenuItem } from 'primevue/menuitem'
 
-import { useClipboard, type ClipItem, type Tag } from '~/store'
+import { useClipboard, type ClipItem, type Tag, OptionType } from '~/store'
 
 definePageMeta({
   middleware: 'route-guard'
@@ -100,6 +100,7 @@ const isShowAddTagInput = ref(false)
 const currentDrag = ref<{ tag?: Tag; item?: ClipItem }>({})
 
 onMounted(() => {
+  // 监听修改创建
   window.addEventListener('storage', content => {
     const data = JSON.parse(content.newValue!)
     clipboard.list = data.list
@@ -165,6 +166,8 @@ const itemMenu: MenuItem[] = [
   {
     label: '修改',
     command() {
+      clipboard.optionType = OptionType.Edit
+      clipboard.currentTagMenu = undefined
       window.electron.showEdit()
     }
   },
@@ -179,7 +182,17 @@ const itemMenu: MenuItem[] = [
 
 const firstTagMenu: MenuItem[] = [
   {
+    label: '新增记录',
+    order: 1,
+    command() {
+      clipboard.optionType = OptionType.Add
+      clipboard.currentItemMenu = undefined
+      window.electron.showEdit()
+    }
+  },
+  {
     label: '删除全部记录',
+    order: 3,
     command() {
       if (!clipboard.currentTagMenu) return
       clipboard.removeByTagId(clipboard.currentTagMenu.id)
@@ -190,6 +203,7 @@ const firstTagMenu: MenuItem[] = [
 const otherTagMenu: MenuItem[] = [
   {
     label: '删除标签',
+    order: 2,
     command() {
       const id = clipboard.currentTagMenu?.id
       if (!clipboard.currentTagMenu || !id) return
@@ -202,7 +216,9 @@ const otherTagMenu: MenuItem[] = [
 ]
 
 const tagMenu = computed(() =>
-  clipboard.currentTagMenu?.id === 0 ? firstTagMenu : otherTagMenu
+  (clipboard.currentTagMenu?.id === 0 ? firstTagMenu : otherTagMenu).sort(
+    (a, b) => a.order - b.order
+  )
 )
 
 const onItemMenuClick = (e: Event, item: ClipItem) => {

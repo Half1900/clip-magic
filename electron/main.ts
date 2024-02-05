@@ -65,7 +65,7 @@ const registerHandle = (win: BrowserWindow) => {
 const registerEvent = (win: BrowserWindow) => {
   win.on('blur', () => {
     if (win.isVisible()) {
-      // win.hide()
+      win.hide()
     }
   })
 }
@@ -114,8 +114,7 @@ const createMainWindow = () => {
     y: height - winHeight,
     fullscreenable: false,
     show: false,
-    // skipTaskbar: true,
-    skipTaskbar: false,
+    skipTaskbar: true,
     titleBarStyle: 'hidden'
   })
 

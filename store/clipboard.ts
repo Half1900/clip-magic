@@ -16,6 +16,11 @@ export interface Tag {
   color: `${PresetColorKey}-inverse`
 }
 
+export enum OptionType {
+  'Add' = 'add',
+  'Edit' = 'edit'
+}
+
 export const useClipboard = defineStore(
   'clipboard',
   () => {
@@ -33,6 +38,7 @@ export const useClipboard = defineStore(
     })
     const currentItemMenu = ref<ClipItem>()
     const currentTagMenu = ref<Tag>()
+    const optionType = ref<OptionType>()
 
     const clipList = computed(() =>
       list.value.filter(item => item.tagId === currTag.id)
@@ -41,14 +47,16 @@ export const useClipboard = defineStore(
     const add = (
       item: Pick<ClipItem, 'content'> & Partial<Omit<ClipItem, 'content'>>
     ) => {
-      list.value.unshift({
+      const data = {
         id: key.itemId,
         tagId: 0,
         title: 'No title',
         date: new Date(),
         ...item
-      })
+      }
+      list.value.unshift(data)
       key.itemId++
+      return data
     }
 
     const remove = (id: number) => {
@@ -82,6 +90,7 @@ export const useClipboard = defineStore(
       key,
       list,
       clipList,
+      optionType,
       add,
       remove,
       removeByTagId,

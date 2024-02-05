@@ -14,31 +14,49 @@
       spellcheck="false"
       @input="handleInput"
     >
-      {{ clipboard.currentItemMenu?.content }}
+      {{ content }}
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useClipboard } from '~/store'
+import { OptionType, useClipboard } from '~/store'
 
-const rowNum = ref(13)
-const contentRef = ref<HTMLDivElement>()
 const clipboard = useClipboard()
 
+const isEdit = clipboard.optionType === OptionType.Edit
+
+const rowNum = ref(13)
+const content = ref(clipboard.currentItemMenu?.content ?? '')
+const contentRef = ref<HTMLDivElement>()
+
 const handleInput = (e: any) => {
-  const content = e.target.innerText
-  clipboard.currentItemMenu!.content = content
-  console.log('clipboard.currentItemMenu ==> ', clipboard.currentItemMenu)
-  for (const item of clipboard.list) {
-    if (item.id === clipboard.currentItemMenu?.id) {
-      item.content = content
-      break
+  content.value = e.target.innerText
+
+  if (isEdit) {
+    clipboard.currentItemMenu!.content = content.value
+    for (const item of clipboard.list) {
+      if (item.id === clipboard.currentItemMenu?.id) {
+        item.content = content.value
+        break
+      }
     }
   }
+
   const num = (contentRef.value!.offsetHeight - 20) / 30
   rowNum.value = num <= 13 ? 13 : num
 }
+
+onMounted(() => {
+  if (isEdit) return
+  window.addEventListener('beforeunload', () => {
+    if (!content.value) return
+    clipboard.add({
+      content: content.value,
+      tagId: clipboard.currentTagMenu!.id
+    })
+  })
+})
 </script>
 
 <style scoped></style>
