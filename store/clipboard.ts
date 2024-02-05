@@ -31,6 +31,8 @@ export const useClipboard = defineStore(
       title: '',
       color: 'green-inverse'
     })
+    const currentItemMenu = ref<ClipItem>()
+    const currentTagMenu = ref<Tag>()
 
     const clipList = computed(() =>
       list.value.filter(item => item.tagId === currTag.id)
@@ -88,7 +90,9 @@ export const useClipboard = defineStore(
       currTag,
       addTag,
       selectTag,
-      removeTag
+      removeTag,
+      currentItemMenu,
+      currentTagMenu
     }
   },
   {

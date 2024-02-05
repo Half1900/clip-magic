@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
 
-import { ClipboardEvent, SettingsEvent } from './event'
+import { ClipboardEvent, EditEvent, SettingsEvent } from './event'
 import { Settings } from './utils'
 
 contextBridge.exposeInMainWorld('electron', {
@@ -8,5 +8,6 @@ contextBridge.exposeInMainWorld('electron', {
   paste: (content: string) => ipcRenderer.invoke(ClipboardEvent.Paste, content),
   getSettings: () => ipcRenderer.invoke(SettingsEvent.Get),
   updateSettings: (content: Settings) =>
-    ipcRenderer.invoke(SettingsEvent.Update, content)
+    ipcRenderer.invoke(SettingsEvent.Update, content),
+  showEdit: () => ipcRenderer.invoke(EditEvent.Show)
 })

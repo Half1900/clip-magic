@@ -99,6 +99,14 @@ const addTagInputRef = ref<HTMLInputElement>()
 const isShowAddTagInput = ref(false)
 const currentDrag = ref<{ tag?: Tag; item?: ClipItem }>({})
 
+onMounted(() => {
+  window.addEventListener('storage', content => {
+    const data = JSON.parse(content.newValue!)
+    clipboard.list = data.list
+    clipboard.currentItemMenu = data.currentItemMenu
+  })
+})
+
 const timer = setInterval(async () => {
   const text = await window.electron.getClipText()
   if (!text) return
@@ -152,19 +160,19 @@ const handleDragEnd = (item: ClipItem) => {
 
 const itemMenuRef = ref<InstanceType<typeof ContextMenu> | null>(null)
 const tagMenuRef = ref<InstanceType<typeof ContextMenu> | null>(null)
-const currentItemMenu = ref<ClipItem>()
-const currentTagMenu = ref<Tag>()
 
 const itemMenu: MenuItem[] = [
   {
     label: '修改',
-    command() {}
+    command() {
+      window.electron.showEdit()
+    }
   },
   {
     label: '删除',
     command() {
-      if (!currentItemMenu.value) return
-      clipboard.remove(currentItemMenu.value.id)
+      if (!clipboard.currentItemMenu) return
+      clipboard.remove(clipboard.currentItemMenu.id)
     }
   }
 ]
@@ -173,8 +181,8 @@ const firstTagMenu: MenuItem[] = [
   {
     label: '删除全部记录',
     command() {
-      if (!currentTagMenu.value) return
-      clipboard.removeByTagId(currentTagMenu.value.id)
+      if (!clipboard.currentTagMenu) return
+      clipboard.removeByTagId(clipboard.currentTagMenu.id)
     }
   }
 ]
@@ -183,8 +191,8 @@ const otherTagMenu: MenuItem[] = [
   {
     label: '删除标签',
     command() {
-      const id = currentTagMenu.value?.id
-      if (!currentTagMenu.value || !id) return
+      const id = clipboard.currentTagMenu?.id
+      if (!clipboard.currentTagMenu || !id) return
       clipboard.removeTag(id)
       clipboard.removeByTagId(id)
       clipboard.selectTag(clipboard.firstTag)
@@ -194,16 +202,16 @@ const otherTagMenu: MenuItem[] = [
 ]
 
 const tagMenu = computed(() =>
-  currentTagMenu.value?.id === 0 ? firstTagMenu : otherTagMenu
+  clipboard.currentTagMenu?.id === 0 ? firstTagMenu : otherTagMenu
 )
 
 const onItemMenuClick = (e: Event, item: ClipItem) => {
-  currentItemMenu.value = item
+  clipboard.currentItemMenu = item
   itemMenuRef.value?.show(e)
 }
 
 const onTagMenuClick = (e: Event, tag: Tag) => {
-  currentTagMenu.value = tag
+  clipboard.currentTagMenu = tag
   tagMenuRef.value?.show(e)
 }
 

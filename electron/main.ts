@@ -9,7 +9,7 @@ import {
   type NativeImage
 } from 'electron'
 
-import { ClipboardEvent, SettingsEvent } from './event'
+import { ClipboardEvent, EditEvent, SettingsEvent } from './event'
 import { useWindow } from './hooks'
 import { ClipboardObserver, loadSettingsFile, writeSettingsFile } from './utils'
 
@@ -46,12 +46,26 @@ const registerHandle = (win: BrowserWindow) => {
   ipcMain.handle(SettingsEvent.Update, (_, content) => {
     return writeSettingsFile(JSON.parse(content))
   })
+  ipcMain.handle(EditEvent.Show, () => {
+    const l = 450
+    createWindow('edit', {
+      title: '编辑',
+      parent: win,
+      width: l,
+      maxWidth: l,
+      minWidth: l,
+      height: l,
+      maxHeight: l,
+      minHeight: l,
+      fullscreenable: false
+    })
+  })
 }
 
 const registerEvent = (win: BrowserWindow) => {
   win.on('blur', () => {
     if (win.isVisible()) {
-      win.hide()
+      // win.hide()
     }
   })
 }
@@ -64,6 +78,7 @@ const createMenu = (win: BrowserWindow) => {
       label: '选项',
       click() {
         createWindow('settings', {
+          title: '选项',
           parent: win
         })
       }
@@ -91,13 +106,16 @@ const createMainWindow = () => {
   const win = createWindow({
     height: winHeight,
     width,
+    minWidth: width,
+    maxWidth: width,
     minHeight: winHeight,
     maxHeight: winHeight,
     x: 0,
     y: height - winHeight,
     fullscreenable: false,
     show: false,
-    skipTaskbar: true,
+    // skipTaskbar: true,
+    skipTaskbar: false,
     titleBarStyle: 'hidden'
   })
 

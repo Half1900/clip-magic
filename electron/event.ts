@@ -7,3 +7,7 @@ export enum SettingsEvent {
   Get = 'settings-get',
   Update = 'settings-update'
 }
+
+export enum EditEvent {
+  Show = 'edit-show'
+}

@@ -4,6 +4,7 @@ interface Window {
     paste(content: string): Promise<void>
     getSettings(): Promise<any>
     updateSettings(content: string): Promise<void>
+    showEdit(): Promise<void>
   }
 }
 
