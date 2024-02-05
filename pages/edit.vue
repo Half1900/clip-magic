@@ -2,7 +2,7 @@
   <div class="relative h-[100vh] w-[100vw]">
     <div class="absolute left-0 top-0 h-full w-full p-[10px]">
       <span
-        class="block h-[30px] border-b-2 border-dotted border-primary-500"
+        class="block h-[30px] border-b-2 border-dotted border-x-primary-100"
         v-for="i in rowNum"
         :key="i"
       />

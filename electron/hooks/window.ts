@@ -15,7 +15,7 @@ const title = 'Clip Magic'
 const icon = nativeImage.createFromDataURL(iconPath)
 const loadFileUrl = '.output/public'
 
-const windowMap = new Map<string, BrowserWindow>()
+export const windowMap = new Map<string, BrowserWindow>()
 
 const createWindow: CreateWindow = (windowId, options) => {
   if (windowMap.has(windowId)) {

@@ -10,7 +10,7 @@ import {
 } from 'electron'
 
 import { ClipboardEvent, EditEvent, SettingsEvent } from './event'
-import { useWindow } from './hooks'
+import { useWindow, windowMap } from './hooks'
 import { ClipboardObserver, loadSettingsFile, writeSettingsFile } from './utils'
 
 export type ChangeText = (text: string) => void
@@ -64,7 +64,7 @@ const registerHandle = (win: BrowserWindow) => {
 
 const registerEvent = (win: BrowserWindow) => {
   win.on('blur', () => {
-    if (win.isVisible()) {
+    if (windowMap.size === 1 && win.isVisible()) {
       win.hide()
     }
   })
@@ -114,7 +114,7 @@ const createMainWindow = () => {
     y: height - winHeight,
     fullscreenable: false,
     show: false,
-    skipTaskbar: true,
+    skipTaskbar: false,
     titleBarStyle: 'hidden'
   })
 
