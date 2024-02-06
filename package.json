@@ -1,5 +1,6 @@
 {
   "name": "clip-magic",
+  "title": "Clip Magic",
   "version": "1.4.0",
   "private": true,
   "description": "clip-magic",
@@ -19,6 +20,7 @@
     "build-installer:generate": "npm run generate && electron-builder"
   },
   "main": "dist-electron/main.js",
+  "loadFileURL": ".output/public",
   "devDependencies": {
     "@nuxt/devtools": "^0.7.4",
     "@nuxt/ui-templates": "^1.3.1",

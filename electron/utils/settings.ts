@@ -2,6 +2,8 @@ import { app } from 'electron'
 import fs from 'node:fs'
 import { join } from 'node:path'
 
+import pkg from '../../package.json'
+
 export interface Settings {
   openAtLogin: boolean
   openShortcutKey: string
@@ -13,7 +15,7 @@ const defaultSettings: Settings = {
 }
 
 const homePath = app.getPath('home')
-const configPath = join(homePath, '.clip-magic/config')
+const configPath = join(homePath, `.${pkg.name}`, '/config')
 const settingsFilePath = join(configPath, './settings.json')
 
 export const loadSettingsFile = () => {

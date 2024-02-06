@@ -2,6 +2,7 @@ import { app, BrowserWindow, nativeImage } from 'electron'
 import { join } from 'path'
 
 import iconPath from '../../assets/image/logo.png'
+import pkg from '../../package.json'
 
 interface CreateWindow {
   (
@@ -11,9 +12,9 @@ interface CreateWindow {
   (options?: Electron.BrowserWindowConstructorOptions): BrowserWindow
 }
 
-const title = 'Clip Magic'
+const title = pkg.title
 const icon = nativeImage.createFromDataURL(iconPath)
-const loadFileUrl = '.output/public'
+const loadFileURL = pkg.loadFileURL
 
 export const windowMap = new Map<string, BrowserWindow>()
 
@@ -42,7 +43,7 @@ const createWindow: CreateWindow = (windowId, options) => {
   if (!app.isPackaged && process.env.VITE_DEV_SERVER_URL) {
     window.loadURL(process.env.VITE_DEV_SERVER_URL + loadPath)
   } else {
-    window.loadFile(loadFileUrl + loadPath + '/index.html')
+    window.loadFile(loadFileURL + loadPath + '/index.html')
   }
 
   window.on('close', () => windowMap.delete(windowId))
