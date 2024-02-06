@@ -5,17 +5,12 @@ import {
   screen,
   globalShortcut,
   Tray,
-  Menu,
-  type NativeImage
+  Menu
 } from 'electron'
 
 import { ClipboardEvent, EditEvent, SettingsEvent } from './event'
 import { useWindow, windowMap } from './hooks'
 import { ClipboardObserver, loadSettingsFile, writeSettingsFile } from './utils'
-
-export type ChangeText = (text: string) => void
-export type ChangeImage = (image: NativeImage) => void
-export type ChangeHTML = (html: string) => void
 
 const windowHook = useWindow()
 const createWindow = windowHook.createWindow

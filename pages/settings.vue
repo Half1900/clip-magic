@@ -14,6 +14,12 @@
           @keyup="handleShortcutKeyUp"
         />
       </a-descriptions-item>
+      <a-descriptions-item label="每个标签最大存储记录数">
+        <a-input-number
+          :min="1"
+          v-model:value="settings.PerTagMaximumStorage"
+        />
+      </a-descriptions-item>
     </a-descriptions>
 
     <a-button @click="handleSubmit">保存</a-button>
@@ -22,8 +28,9 @@
 
 <script setup lang="ts">
 import { message } from 'ant-design-vue'
-const [messageApi, contextHolder] = message.useMessage()
 import { Settings } from 'electron/utils'
+
+const [messageApi, contextHolder] = message.useMessage()
 
 const settings = ref<Partial<Settings>>({})
 

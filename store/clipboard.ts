@@ -3,7 +3,7 @@ import { PresetColorKey } from 'ant-design-vue/es/theme/interface'
 import { getRandomColor } from '~/utils'
 
 export interface ClipItem {
-  id: number
+  id: string
   tagId: number
   date: Date
   title?: string
@@ -27,7 +27,6 @@ export const useClipboard = defineStore(
     const list = ref<ClipItem[]>([])
     const tags = ref<Tag[]>([{ id: 0, title: '默认', color: 'green-inverse' }])
     const key = reactive({
-      itemId: 1,
       tagId: 1
     })
     const firstTag = computed(() => tags.value[0])
@@ -44,22 +43,32 @@ export const useClipboard = defineStore(
       list.value.filter(item => item.tagId === currTag.id)
     )
 
-    const add = (
+    const add = async (
       item: Pick<ClipItem, 'content'> & Partial<Omit<ClipItem, 'content'>>
     ) => {
       const data = {
-        id: key.itemId,
+        id: crypto.randomUUID(),
         tagId: 0,
         title: 'No title',
         date: new Date(),
         ...item
       }
       list.value.unshift(data)
-      key.itemId++
+
+      const config = await window.electron.getSettings()
+
+      const curAllTag = list.value.filter(it => it.tagId === data.tagId)
+      while (curAllTag.length > config.PerTagMaximumStorage!) {
+        const removeItem = curAllTag.pop()
+        if (removeItem) {
+          remove(removeItem.id)
+        }
+      }
+
       return data
     }
 
-    const remove = (id: number) => {
+    const remove = (id: string) => {
       list.value = list.value.filter(item => item.id !== id)
     }
 

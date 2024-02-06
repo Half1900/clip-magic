@@ -1,4 +1,8 @@
-import { clipboard } from 'electron'
+import { clipboard, type NativeImage } from 'electron'
+
+export type ChangeText = (text: string) => void
+export type ChangeImage = (image: NativeImage) => void
+export type ChangeHTML = (html: string) => void
 
 export class ClipboardObserver {
   private preContext?: string

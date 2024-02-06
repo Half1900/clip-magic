@@ -7,11 +7,13 @@ import pkg from '../../package.json'
 export interface Settings {
   openAtLogin: boolean
   openShortcutKey: string
+  PerTagMaximumStorage: number
 }
 
 const defaultSettings: Settings = {
   openAtLogin: false,
-  openShortcutKey: 'CommandOrControl+Shift+V'
+  openShortcutKey: 'CommandOrControl+Shift+V',
+  PerTagMaximumStorage: 50
 }
 
 const homePath = app.getPath('home')
