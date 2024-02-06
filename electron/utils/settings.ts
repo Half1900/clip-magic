@@ -1,3 +1,4 @@
+import { app } from 'electron'
 import fs from 'node:fs'
 import { join } from 'node:path'
 
@@ -11,13 +12,14 @@ const defaultSettings: Settings = {
   openShortcutKey: 'CommandOrControl+Shift+V'
 }
 
-const configPath = join(__dirname, 'config')
-const settingsFilePath = join(configPath, './setttings.json')
+const homePath = app.getPath('home')
+const configPath = join(homePath, '.clip-magic/config')
+const settingsFilePath = join(configPath, './settings.json')
 
 export const loadSettingsFile = () => {
   const configExist = fs.existsSync(configPath)
   if (!configExist) {
-    fs.mkdirSync(configPath)
+    fs.mkdirSync(configPath, { recursive: true })
   }
   const settingsExist = fs.existsSync(settingsFilePath)
   if (!settingsExist) {
