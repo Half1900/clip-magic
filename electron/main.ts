@@ -19,7 +19,7 @@ const settings = loadSettingsFile()
 const registerGlobalShortcuts = (win: BrowserWindow) => {
   globalShortcut.register(settings.openShortcutKey, () => {
     if (win.isVisible()) {
-      win.hide()
+      win.blur()
     } else {
       win.showInactive()
     }
