@@ -21,7 +21,7 @@ const registerGlobalShortcuts = (win: BrowserWindow) => {
     if (win.isVisible()) {
       win.hide()
     } else {
-      win.show()
+      win.showInactive()
     }
   })
 }
@@ -33,7 +33,7 @@ const registerHandle = (win: BrowserWindow) => {
   })
   ipcMain.handle(ClipboardEvent.Paste, (_, content) => {
     board.writeText(content as unknown as string)
-    win.hide()
+    win.blur()
   })
   ipcMain.handle(SettingsEvent.Get, () => {
     return settings
@@ -110,7 +110,8 @@ const createMainWindow = () => {
     fullscreenable: false,
     show: false,
     skipTaskbar: false,
-    titleBarStyle: 'hidden'
+    titleBarStyle: 'hidden',
+    alwaysOnTop: true
   })
 
   return win
