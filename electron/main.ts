@@ -20,6 +20,7 @@ const registerGlobalShortcuts = (win: BrowserWindow) => {
   globalShortcut.register(settings.openShortcutKey, () => {
     if (win.isVisible()) {
       win.blur()
+      win.hide()
     } else {
       win.showInactive()
     }
