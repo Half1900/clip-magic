@@ -15,6 +15,8 @@ import { ClipboardObserver, loadSettingsFile, writeSettingsFile } from './utils'
 const windowHook = useWindow()
 const createWindow = windowHook.createWindow
 const settings = loadSettingsFile()
+const board = new ClipboardObserver()
+let clipText: string[] = []
 
 const registerGlobalShortcuts = (win: BrowserWindow) => {
   globalShortcut.register(settings.openShortcutKey, () => {
@@ -28,13 +30,17 @@ const registerGlobalShortcuts = (win: BrowserWindow) => {
 }
 
 const registerHandle = (win: BrowserWindow) => {
-  const board = new ClipboardObserver()
   ipcMain.handle(ClipboardEvent.Change, () => {
     return board.readText()
   })
   ipcMain.handle(ClipboardEvent.Paste, (_, content) => {
     board.writeText(content as unknown as string)
     win.blur()
+  })
+  ipcMain.handle(ClipboardEvent.GetSaveList, () => {
+    const list = [...clipText]
+    clipText = []
+    return list
   })
   ipcMain.handle(SettingsEvent.Get, () => {
     return settings
@@ -126,11 +132,27 @@ const registerAppSettings = () => {
   }
 }
 
+const saveClipTextJob = (win: BrowserWindow) => {
+  let saveClipTextTimer: any = null
+  win.on('hide', () => {
+    saveClipTextTimer = setInterval(() => {
+      const text = board.readText()
+      if (!text) return
+      clipText.push(text!)
+    }, 300)
+  })
+  win.on('show', () => {
+    clearInterval(saveClipTextTimer)
+  })
+}
+
 app.whenReady().then(() => {
   // 注册App配置
   registerAppSettings()
   // 创建窗口
   const win = createMainWindow()
+  // 开启保存文本任务
+  saveClipTextJob(win)
   // 创建菜单
   createMenu(win)
   // 注册快捷键

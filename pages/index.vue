@@ -92,7 +92,6 @@ definePageMeta({
   middleware: 'route-guard'
 })
 
-const interval = 500
 const clipboard = useClipboard()
 const pasteListRef = ref<HTMLDivElement>()
 const addTagInputRef = ref<HTMLInputElement>()
@@ -106,15 +105,29 @@ onMounted(() => {
     clipboard.list = data.list
     clipboard.currentItemMenu = data.currentItemMenu
   })
-})
 
-const timer = setInterval(async () => {
-  const text = await window.electron.getClipText()
-  if (!text) return
-  clipboard.add({
-    content: text
+  let timer: any = null
+  const interval = 300
+  document.addEventListener('visibilitychange', async () => {
+    if (!document.hidden) {
+      const list = await window.electron.getClipTextSaveList()
+      list.forEach(text => {
+        clipboard.add({
+          content: text
+        })
+      })
+      timer = setInterval(async () => {
+        const text = await window.electron.getClipText()
+        if (!text) return
+        clipboard.add({
+          content: text
+        })
+      }, interval)
+    } else {
+      timer && clearInterval(timer)
+    }
   })
-}, interval)
+})
 
 const handleSelect = async (item: ClipItem) => {
   await window.electron.paste(item.content)
