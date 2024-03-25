@@ -7,6 +7,7 @@ import {
   Tray,
   Menu
 } from 'electron'
+import { nextTick } from 'process'
 
 import { ClipboardEvent, EditEvent, SettingsEvent } from './event'
 import { useWindow, windowMap } from './hooks'
@@ -146,6 +147,13 @@ const saveClipTextJob = (win: BrowserWindow) => {
   })
 }
 
+const handleFirstStartUp = (win: BrowserWindow) => {
+  win.show()
+  nextTick(() => {
+    win.hide()
+  })
+}
+
 app.whenReady().then(() => {
   // 注册App配置
   registerAppSettings()
@@ -161,6 +169,8 @@ app.whenReady().then(() => {
   registerHandle(win)
   // 注册事件
   registerEvent(win)
+  // 首次启动
+  handleFirstStartUp(win)
 })
 
 app.on('will-quit', () => {
